@@ -1,0 +1,10 @@
+env-face/
+__pycache__/
+*.pyc
+bin/
+share/
+man/
+doc/
+*.pkl
+*.dat
+dataset/
