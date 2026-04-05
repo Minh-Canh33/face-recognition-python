@@ -8,3 +8,6 @@ doc/
 *.pkl
 *.dat
 dataset/
+
+*.db
+data/
