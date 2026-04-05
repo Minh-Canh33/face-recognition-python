@@ -15,6 +15,7 @@ Project supports face detection, recognition, training, and database storage.
 - 🖥️ Simple GUI with Tkinter  
 
 ---
+```text
 Face_recognizer/
 │
 ├── src/                    # Core logic
@@ -35,6 +36,7 @@ Face_recognizer/
 ├── testtk.py               # Tkinter UI demo
 ├── requirements.txt
 └── .gitignore
+```
 
 ## ⚙️ Installation  
 
