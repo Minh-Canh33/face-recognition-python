@@ -1,85 +1,74 @@
-# Face Recognition with Python
+📦 Face Recognition Python
 
-## 📌 Introduction
+A simple Face Recognition System built with Python using computer vision and machine learning techniques.
+Project supports face detection, recognition, training, and database storage.
 
-This project uses Python and computer vision techniques to perform real-time face recognition.
-The system encodes known faces from images and compares them with faces detected from a webcam or screen capture.
-
-## ⚙️ Technologies Used
-
-* Python
-* OpenCV
-* face_recognition
-* dlib
-* NumPy
-
-## 📂 Project Structure
-
-```
-Face_recognizer
+🚀 Features
+🎯 Real-time face detection (camera)
+🧠 Face recognition with encoding
+💾 Store and load face data using SQLite
+🏗️ Modular structure (easy to extend)
+🖥️ Simple GUI with Tkinter
+📁 Project Structure
+Face_recognizer/
 │
-├── data
-│   └── Pic
-│       ├── person1.jpg
-│       ├── person2.jpg
-│       └── person3.jpg
+├── src/                # Core logic
+│   ├── detector.py     # Detect faces from image/frame
+│   ├── recognizer.py   # Recognize faces
+│   ├── trainer.py      # Train face encodings
+│   ├── utils.py        # Helper functions
+│   └── main.py         # Main pipeline (camera + processing)
 │
-├── detector.py
-├── requirements.txt
+├── database/           # Database handling
+│   ├── Sqlite.py
+│   ├── insert_faces.py
+│   ├── load_faces.py
+│   └── __init__.py
+│
+├── data/               # (ignored) database + raw data
+│
+├── testtk.py           # Tkinter UI demo
+│
+├── .gitignore
 └── README.md
-```
-
-## 🚀 Features
-
-* Detect faces in real time
-* Encode faces from images
-* Compare detected faces with known faces
-* Display the recognized person's name
-
-## 🛠 Installation
-
-Clone the repository:
-
-```
-git clone https://github.com/yourusername/face-recognition-python.git
-```
-
-Install dependencies:
-
-```
+⚙️ Installation
+1. Clone repo
+git clone https://github.com/Minh-Canh33/face-recognition-python.git
+cd face-recognition-python
+2. Create virtual environment
+python -m venv env-face
+source env-face/Scripts/activate   # Windows
+3. Install dependencies
 pip install -r requirements.txt
-```
+▶️ Usage
+🔹 Run main face recognition
+python src/main.py
+🔹 Run UI (Tkinter)
+python testtk.py
+🧠 How it works
+📷 Capture frame from camera
+🔍 Detect faces (detector.py)
+🧬 Encode & compare (recognizer.py)
+🗂️ Load known faces from database
+🏷️ Display name on screen
+💾 Database
+Uses SQLite
+Stored in:
+data/face.db
 
-## ▶️ Run the project
+⚠️ File is ignored in Git (.gitignore)
 
-```
-python detector.py
-```
-
-Press **Q** to exit the program.
-
-## 📸 Dataset
-
-Images used for training should be placed in the `data/Pic` folder.
-Each image filename represents the person's name.
-
-Example:
-
-```
-ElonMusk.jpg
-DonaldTrump.jpg
-MyPhoto.jpg
-```
-
-## 📖 How it works
-
-1. Load images from the dataset folder
-2. Encode each face using the face_recognition library
-3. Capture frames from the webcam
-4. Detect faces in each frame
-5. Compare with known encodings
-6. Display the matched name on the screen
-
-## 👤 Author
-
+🛠️ Future Improvements
+🚀 Improve recognition accuracy
+⚡ Optimize performance (reduce lag)
+🧑‍💻 Add user management UI
+☁️ Deploy as web/app
+📌 Notes
+Make sure camera is available
+Good lighting improves accuracy
+Large datasets improve recognition
+👨‍💻 Author
 Minh Canh
+⭐ If you like this project
+
+Give it a ⭐ on GitHub!
