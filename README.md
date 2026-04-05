@@ -15,24 +15,26 @@ Project supports face detection, recognition, training, and database storage.
 - 🖥️ Simple GUI with Tkinter  
 
 ---
-
-## 📁 Project Structure  
-ace_recognizer/
+Face_recognizer/
 │
-├── src/ # Core logic
-│ ├── detector.py
-│ ├── recognizer.py
-│ ├── trainer.py
-│ ├── utils.py
-│ └── main.py
+├── src/                    # Core logic
+│   ├── detector.py         # Detect faces from image/frame
+│   ├── recognizer.py       # Recognize faces
+│   ├── trainer.py          # Train face encodings
+│   ├── utils.py            # Helper functions
+│   └── main.py             # Main pipeline (camera + processing)
 │
-├── database/ # Database handling
-│ ├── Sqlite.py
-│ ├── insert_faces.py
-│ ├── load_faces.py
-│ └── init.py
+├── database/               # Database handling
+│   ├── Sqlite.py
+│   ├── insert_faces.py
+│   ├── load_faces.py
+│   └── __init__.py
 │
----
+├── data/                   # (Ignored) database + raw data
+├── env-face/               # Virtual environment
+├── testtk.py               # Tkinter UI demo
+├── requirements.txt
+└── .gitignore
 
 ## ⚙️ Installation  
 
