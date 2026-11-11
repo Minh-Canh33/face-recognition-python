@@ -80,35 +80,39 @@ The project includes 13 unit tests covering:
 
 ## System Architecture
 
-```text
-Webcam
-   |
-   v
-OpenCV Video Capture
-   |
-   v
-Face Detection
-   |
-   v
-128-D Face Encoding
-   |
-   v
-Face Distance Calculation <---- SQLite Face Database
-   |
-   v
-Threshold-Based Matching
-   |
-   +---- Known Identity
-   |
-   +---- Unknown
-   |
-   v
-PySide6 Desktop Interface
-   |
-   +---- Live Recognition
-   +---- People Management
-   +---- Performance Monitoring
-```
+flowchart TD
+    A["Webcam"] --> B["OpenCV Video Capture"]
+    B --> C["Face Detection"]
+    C --> D["128-D Face Embedding"]
+
+    E[("SQLite Face Database")] --> F["Face Distance Calculation"]
+    D --> F
+
+    F --> G{"Distance ≤ Threshold?"}
+    G -->|Yes| H["Known Identity"]
+    G -->|No| I["Unknown"]
+
+    H --> J["PySide6 Desktop Application"]
+    I --> J
+
+    J --> K["Live Recognition"]
+    J --> L["People Management"]
+    J --> M["Performance Monitoring"]
+
+    N["Face Enrollment"] --> O["Generate Face Embedding"]
+    O --> E
+
+    classDef input fill:#DBEAFE,stroke:#2563EB,color:#1E40AF
+    classDef processing fill:#E0F2FE,stroke:#0284C7,color:#075985
+    classDef storage fill:#F3E8FF,stroke:#9333EA,color:#6B21A8
+    classDef decision fill:#FEF3C7,stroke:#D97706,color:#92400E
+    classDef result fill:#DCFCE7,stroke:#16A34A,color:#166534
+
+    class A,N input
+    class B,C,D,F,O,J,K,L,M processing
+    class E storage
+    class G decision
+    class H,I result
 
 ## How It Works
 
