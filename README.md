@@ -1,273 +1,409 @@
+	
 
+# Face Recognition Python
 
-# Face Recognition — Real-Time Desktop Recognition & Evaluation
+A desktop face recognition application built with **Python, OpenCV, dlib, face_recognition, PySide6, and SQLite**.
 
-A Python desktop application for real-time face detection, face recognition, and identity management, built with PySide6, OpenCV, face_recognition/dlib, and SQLite.
+The system supports real-time face detection and identification, face enrollment, identity management, and performance evaluation.
 
-The project combines a webcam-based recognition pipeline, a desktop interface for managing registered faces, automated tests, and an offline benchmark that reports identification accuracy, false acceptance/rejection rates, and processing latency.
-Project scope: A learning and portfolio project demonstrating Python development, computer vision integration, desktop UI design, data persistence, and evaluation. It is not designed for security-critical authentication or surveillance.
+It uses pretrained facial recognition models to generate 128-dimensional face embeddings and compare them against registered identities.
 
-Features
+## Features
 
-- Live recognition: Capture frames from a webcam, detect faces, compute 128-dimensional face embeddings, and display matched identities or Unknown.
-- Responsive desktop UI: PySide6 interface with Live Recognition and People Management pages.
-- Camera lifecycle management: Run capture and recognition in a QThread, with Start/Stop controls and proper camera release.
-- People Management: Register a face from the camera, view stored records, rename entries, and delete selected records.
-- Local storage: Store names and embeddings in SQLite (data/face.db).
-- Configurable matching threshold: Adjust the face-distance threshold from the interface (default: 0.50).
-- Live performance indicators: Display FPS, Recognition FPS, and the latest recognition-pipeline latency in milliseconds.
-- Offline evaluation: Measure identification accuracy, FAR, FRR, wrong-identity rate, mean latency, and P95 latency on a labeled image dataset.
-- Reports and tests: Export benchmark CSV/JSON reports and run automated tests using pytest.
-  Tech Stack
-  Component	Technology	Purpose
-  Language	Python 3.11	Application logic
-  Desktop UI	PySide6 (Qt for Python)	GUI and event handling
-  Image and camera processing	OpenCV	Webcam frames and image conversion
-  Face features and matching	face_recognition, dlib, NumPy	Face detection/encoding and distance-based matching
-  Data storage	SQLite	Registered face records
-  Tests	pytest	Unit tests for matching and database operations
-  Reporting	CSV, JSON	Benchmark results
+### 1. Real-Time Face Recognition
 
-How It Works
+- Capture live video using OpenCV.
+- Detect and recognize faces from webcam frames.
+- Extract 128-dimensional facial embeddings.
+- Match detected faces against registered identities.
+- Label unmatched faces as `Unknown`.
+- Support configurable recognition thresholds.
+- Run camera processing in a separate PySide6 QThread.
 
-1. Enrollment: Capture an image containing exactly one face, compute its 128-dimensional embedding, and save the name and embedding in SQLite.
-2. Capture: OpenCV reads frames from the selected webcam inside a camera worker thread.
-3. Detection and encoding: The application detects face locations and generates embeddings.
-4. Matching: Each embedding is compared with registered embeddings using face distance. If the nearest distance is at or below the configured threshold, its name is returned; otherwise, the result is Unknown.
-5. Display: The desktop UI shows the camera preview, labels, and performance indicators.
-6. Evaluation: An independent labeled image set is used to calculate offline metrics and save reports.
-   Important: The system uses pretrained face-recognition models; enrollment stores embeddings. It does not train a new neural network from scratch.
-   Project Structure
-   face-recognition-python/
-   ├── src/
-   │   ├── main.py                 # PySide6 desktop interface
-   │   ├── camera_worker.py        # Webcam QThread + live recognition and timing
-   │   ├── people_manager.py       # Manage SQLite records
-   │   ├── detector.py             # Face detection helpers
-   │   ├── recognizer.py           # Face embedding matching and reload
-   │   ├── trainer.py              # Enroll images from data/Pic/
-   │   ├── benchmark.py            # Offline evaluation + CSV/JSON reporting
-   │   └── utils.py                # Other image/display helpers
-   ├── database/
-   │   ├── Sqlite.py               # SQLite connection and schema
-   │   ├── insert_faces.py         # Store face embeddings
-   │   ├── load_faces.py           # Load registered embeddings
-   │   └── __init__.py
-   ├── tests/
-   │   ├── test_recognizer.py      # Recognition logic tests
-   │   └── test_database.py        # SQLite CRUD tests
-   ├── data/                       # Local, private data (not committed)
-   │   ├── face.db
-   │   ├── Pic/
-   │   └── benchmark/
-   │       ├── known/<registered-name></registered>/
-   │       └── unknown/
-   ├── reports/                    # Locally generated benchmark reports
-   ├── requirements.txt
-   ├── .gitignore
-   └── README.md
-   Installation (Windows)
-7. Clone the repository
-   git clone https://github.com/Minh-Canh33/face-recognition-python.git
-   cd face-recognition-python
-8. Create a Python 3.11 virtual environment
-   py -3.11 -m venv env-face
-   .\env-face\Scripts\Activate.ps1
-   If PowerShell blocks activation, use Command Prompt (env-face\Scripts\activate.bat) or invoke env-face\Scripts\python.exe directly. Do not change execution policy unnecessarily.
-9. Install dependencies
-   python -m pip install --upgrade pip
-   python -m pip install -r requirements.txt
-   Make sure requirements.txt includes PySide6, opencv-python, face_recognition, numpy, and pytest (or install pytest separately). face_recognition depends on dlib and may require compatible prebuilt packages or C++ build tools on Windows; installation can vary by machine. Python 3.11 is the version used during this project's reported tests.
-10. Initialize the database
-    python -m database.Sqlite
-11. Launch the desktop application
-    python -m src.main
-    Run commands from the repository root, not from inside src/.
-    Using the Application
-    Register a person
-12. Open Live Recognition and click Start Camera.
-13. Make sure exactly one face is visible in the current frame.
-14. Open People Management, enter the person's name, and click Register from Camera.
-15. The name and face embedding are saved in SQLite and made available for recognition without restarting the app.
-    You can also rename or delete selected database records in People Management. Each row currently represents a stored face embedding, not necessarily a distinct real-world person; repeated names are possible.
-    Recognize faces
-16. Go to Live Recognition and click Start Camera.
-17. The app displays matching names or Unknown.
-18. Adjust the threshold if needed; threshold tuning should be validated on separate data rather than selected based on one example.
-19. Click Stop Camera before exiting if desired; the worker also releases the webcam on shutdown.
-    Read the performance indicators
+### 2. People Management
 
-- Display FPS: Processed/displayed frames per second, including frames without a fresh recognition pass.
-- Recognition FPS: Number of completed detection/recognition passes per second under the current frame-skipping configuration.
-- AI Latency: Time spent in the most recent detection-and-recognition pass, in milliseconds; not an average and not end-to-end UI latency.
-  The current live pipeline processes recognition only on selected frames (process_every, default 5), so Display FPS and Recognition FPS measure different things.
-  Offline Benchmark
-  The benchmark compares predictions with ground-truth labels derived from folder names. It does not automatically know a person's identity.
-  Prepare independent test images
-  data/benchmark/
-  ├── known/
-  │   ├── Canh/
-  │   │   ├── test1.jpg
-  │   │   └── test2.jpg
-  │   └── Binh/
-  │       └── test1.jpg
-  └── unknown/
-  └── stranger1.jpg
-- Names under known/ must exactly match names registered in SQLite (including capitalization and spaces).
-- Put only people not enrolled in SQLite under unknown/.
-- Use images that are different from the enrollment images, ideally taken under varied conditions.
-- Each test image should contain exactly one clearly visible face; invalid images are counted separately and excluded from accuracy calculations.
-- Use only images you have permission to process. Do not commit test photos or biometric data.
-  Run the benchmark
-  python -m src.benchmark --threshold 0.50
-  Optionally compare thresholds:
-  python -m src.benchmark --threshold 0.40
-  python -m src.benchmark --threshold 0.60
-  Choose thresholds on a validation set, then report final metrics on a separate test set. Do not tune and evaluate on the same small collection.
-  Metrics
-  Metric	Meaning
-  Identification accuracy	Correct predictions divided by valid test images (known and unknown combined)
-  FAR	Unknown-person images incorrectly accepted as any enrolled identity / valid unknown-person images
-  FRR	Known-person images predicted Unknown / valid known-person images
-  Wrong-identity rate	Known-person images incorrectly assigned another enrolled identity / valid known-person images
-  Mean latency	Average processing time per valid test image, including image load, detection, encoding, and matching
-  P95 latency	95th percentile of those per-image processing times
+- Register new identities directly from the webcam.
+- Store facial embeddings and names in SQLite.
+- View registered face records.
+- Rename and delete registered records.
+- Reload recognition data without restarting the application.
+- Validate face enrollment to accept images containing exactly one detectable face.
 
-Benchmark reports are written to reports/ as detailed CSV, summary CSV, and summary JSON files.
-Example result from a local smoke test
-The following results were measured in a small local test on November 11, 2026, at threshold 0.50:
-Metric	Measured value
-Enrolled identities / embeddings	4 / 4
-Test images	5 (4 known, 1 unknown)
-Valid / invalid images	5 / 0
-Correct predictions	5 / 5
-Identification accuracy on this set	100.0%
-FAR on this set	0 / 1 (0.0%)
-FRR on this set	0 / 4 (0.0%)
-Wrong-identity predictions	0 / 4
-Mean processing latency	657.314 ms/image
-P95 processing latency	879.851 ms/image
+### 3. Performance Monitoring
 
-Interpretation: This was a successful functional smoke test, not evidence of 100% real-world face recognition accuracy. One unknown-person image is insufficient for a reliable FAR estimate. A larger, diverse, independent dataset is required before making general performance claims.
-Automated Tests
-Run from the repository root:
-python -m pytest tests/ -v
-Recorded result (November 11, 2026): 13 tests passed in 2.73 seconds under Windows / Python 3.11.9 / pytest 9.2.0. These unit tests cover SQLite CRUD and embedding-matching logic; they are not a substitute for testing actual recognition accuracy on images.
-Known Limitations and Future Work
+The live recognition interface displays:
 
-- Small benchmark dataset: Increase the number of known/unknown identities and independent images; test different lighting, pose, and camera conditions.
-- Basic enrollment data model: One SQLite row represents one embedding. A future version could use separate persons and face_samples tables to support multiple enrollment samples per person more cleanly.
-- Threshold selection: Evaluate FAR/FRR trade-offs on a validation set and document the chosen threshold.
-- Performance: Recognition occurs on sampled frames; measure and profile detection/encoding separately before optimizing.
-- Robustness: Face recognition may fail or misidentify people under poor lighting, occlusion, motion blur, or other changes.
-- Security: No liveness detection or anti-spoofing. Do not use this prototype to grant physical or account access.
-  Privacy and Data Handling
-  Face images and embeddings are sensitive biometric data. Only enroll people who consent. Keep data/face.db, test images, screenshots containing personal information, and generated private reports out of Git. Support deleting data when no longer needed, and avoid distributing a real database with the source code.
+- Display FPS: Number of processed/displayed frames per second.
+- Recognition FPS: Number of recognition cycles completed per second.
+- AI Latency: Processing time for the latest face detection and recognition cycle.
 
-Recommended .gitignore coverage:
-env-face/
-.venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.idea/
-.vscode/
-data/
-reports/
-Before publishing, review git status and previously tracked files: .gitignore does not automatically untrack files already committed.
-Author
-Đinh Minh Cảnh (Minh Canh)
-GitHub: Minh-Canh33
-Repository: https://github.com/Minh-Canh33/face-recognition-python
+Recognition is performed periodically rather than on every camera frame to reduce processing overhead.
 
-# 📦 Face Recognition Python
+### 4. Benchmark and Evaluation
 
-A simple **Face Recognition System** built with Python using computer vision and machine learning techniques.
+An offline evaluation pipeline is provided to measure:
 
-Project supports face detection, recognition, training, and database storage.
+- Identification Accuracy
+- False Acceptance Rate (FAR)
+- False Rejection Rate (FRR)
+- Wrong Identity Rate
+- Mean Processing Latency
+- P95 Processing Latency
 
----
+Benchmark results are exported as CSV and JSON files.
 
-## 🚀 Features
+### 5. Automated Testing
 
-- 🎯 Real-time face detection (camera)
-- 🧠 Face recognition with encoding
-- 💾 Store and load face data using SQLite
-- 🏗️ Modular structure (easy to extend)
-- 🖥️ Simple GUI with Tkinter
+The project includes 13 unit tests covering:
 
----
+- Face embedding matching
+- Known and unknown identities
+- Recognition thresholds
+- Invalid embedding inputs
+- SQLite insert and load operations
+- Identity renaming and deletion
+- Database input validation
+
+## Tech Stack
+
+| Category            | Technologies           |
+| ------------------- | ---------------------- |
+| Language            | Python 3.11            |
+| Computer Vision     | OpenCV                 |
+| Face Recognition    | face_recognition, dlib |
+| Numerical Computing | NumPy                  |
+| Desktop GUI         | PySide6                |
+| Concurrency         | QThread                |
+| Database            | SQLite                 |
+| Testing             | pytest                 |
+| Reporting           | CSV, JSON              |
+
+## System Architecture
+
+```text
+Webcam
+   |
+   v
+OpenCV Video Capture
+   |
+   v
+Face Detection
+   |
+   v
+128-D Face Encoding
+   |
+   v
+Face Distance Calculation <---- SQLite Face Database
+   |
+   v
+Threshold-Based Matching
+   |
+   +---- Known Identity
+   |
+   +---- Unknown
+   |
+   v
+PySide6 Desktop Interface
+   |
+   +---- Live Recognition
+   +---- People Management
+   +---- Performance Monitoring
+```
+
+## How It Works
+
+### Face Enrollment
+
+1. Open the desktop application.
+2. Start the webcam.
+3. Navigate to People Management.
+4. Enter a person's name.
+5. Capture a frame containing exactly one detectable face.
+6. Generate a 128-dimensional facial embedding.
+7. Save the name and embedding to SQLite.
+8. Reload registered face data.
+
+### Face Recognition
+
+1. OpenCV captures frames from the webcam.
+2. The detection module identifies face locations.
+3. The recognition model generates face embeddings.
+4. Each embedding is compared against stored embeddings using Euclidean distance.
+5. The closest match is selected.
+6. If the distance is below or equal to the configured threshold, the stored identity is returned.
+7. Otherwise, the result is `Unknown`.
+
+The default recognition threshold is `0.50`.
+
+A lower threshold generally applies stricter matching, while a higher threshold allows more permissive matching.
+
+**Note:** The application uses pretrained face recognition models. It does not train a new deep learning model from scratch.
+
+## Project Structure
 
 ```text
 Face_recognizer/
-│
-├── src/                    # Core logic
-│   ├── detector.py         # Detect faces from image/frame
-│   ├── recognizer.py       # Recognize faces
-│   ├── trainer.py          # Train face encodings
-│   ├── utils.py            # Helper functions
-│   └── main.py             # Main pipeline (camera + processing)
-│
-├── database/               # Database handling
-│   ├── Sqlite.py
-│   ├── insert_faces.py
-│   ├── load_faces.py
-│   └── __init__.py
-│
-├── data/                   # (Ignored) database + raw data
-├── env-face/               # Virtual environment
-├── testtk.py               # Tkinter UI demo
-├── requirements.txt
-└── .gitignore
+|
+|-- src/
+|   |-- main.py
+|   |-- camera_worker.py
+|   |-- people_manager.py
+|   |-- detector.py
+|   |-- recognizer.py
+|   |-- trainer.py
+|   |-- benchmark.py
+|   |-- utils.py
+|
+|-- database/
+|   |-- Sqlite.py
+|   |-- insert_faces.py
+|   |-- load_faces.py
+|   |-- __init__.py
+|
+|-- tests/
+|   |-- test_recognizer.py
+|   |-- test_database.py
+|
+|-- data/                  # Local data (Git ignored)
+|   |-- face.db
+|   |-- Pic/
+|   |-- benchmark/
+|       |-- known/
+|       |-- unknown/
+|
+|-- reports/               # Generated reports (Git ignored)
+|
+|-- requirements.txt
+|-- .gitignore
+|-- README.md
 ```
 
-## ⚙️ Installation
+The `data/` and `reports/` directories are local and may not exist immediately after cloning the repository.
 
-### 1. Clone repository
+## Installation (Windows)
 
-```bash
+### 1. Clone the Repository
+
+```powershell
 git clone https://github.com/Minh-Canh33/face-recognition-python.git
 cd face-recognition-python
-├── data/ # Database + raw data (ignored)
-├── testtk.py # Tkinter UI demo
-├── requirements.txt
-├── .gitignore
-└── README.md
-
-### 2. Create virtual environment
-python -m venv env-face
-    Windows:
-env-face\Scripts\activate
-    Mac/Linux:
-source env-face/bin/activate
-
-### 3. Install dependencies
-pip install -r requirements.txt
-
-🧠 How it works
-    📷 Capture frame from camera
-    🔍 Detect faces (detector.py)
-    🧬 Encode & compare (recognizer.py)
-    🗂️ Load known faces from database
-    🏷️ Display name on screen
-💾 Database
-    Uses SQLite
-    Stored in: data/face.db
-⚠️ File is ignored in Git
-    🛠️ Future Improvements
-    🚀 Improve recognition accuracy
-    ⚡ Optimize performance (reduce lag)
-    🧑‍💻 Add user management UI
-    ☁️ Deploy as web/app
-📌 Notes
-    Make sure camera is available
-    Good lighting improves accuracy
-    Large datasets improve recognition
-👨‍💻 Author
-
-Minh Canh
-
-⭐ Support
-
-If you like this project, give it a ⭐ on GitHub!
 ```
+
+### 2. Create a Virtual Environment
+
+Python 3.11 is recommended for the current project environment.
+
+```powershell
+py -3.11 -m venv env-face
+```
+
+Activate the virtual environment:
+
+```powershell
+.\env-face\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, run:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+```
+
+Then activate the environment again.
+
+### 3. Install Dependencies
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+The project has been developed using Windows, Python 3.11, and prebuilt dlib binaries.
+
+Package installation may vary depending on Python version, operating system, and wheel availability.
+
+### 4. Initialize the Database
+
+```powershell
+python -m database.Sqlite
+```
+
+This creates the SQLite database and required table if they do not already exist.
+
+Default database path:
+
+```text
+data/face.db
+```
+
+### 5. Run the Application
+
+```powershell
+python -m src.main
+```
+
+The PySide6 desktop interface will open.
+
+## Using the Application
+
+### Live Recognition
+
+1. Select **Live Recognition**.
+2. Click **Start Camera**.
+3. Allow the webcam to capture video.
+4. View face bounding boxes and recognized names.
+5. Monitor Display FPS, Recognition FPS, and AI Latency.
+6. Click **Stop Camera** to release the webcam.
+
+### People Management
+
+1. Start the camera.
+2. Navigate to **People Management**.
+3. Enter the person's name.
+4. Click **Register from Camera**.
+5. Confirm the successful registration.
+6. Use the table to rename or delete registered face records.
+
+Changes are saved to SQLite and can be reloaded into the recognition process without restarting the application.
+
+## Benchmark and Evaluation
+
+### Dataset Structure
+
+Prepare a labeled evaluation dataset:
+
+```text
+data/benchmark/
+|
+|-- known/
+|   |-- Person01/
+|   |   |-- test1.jpg
+|   |   |-- test2.jpg
+|   |
+|   |-- Person02/
+|       |-- test1.jpg
+|       |-- test2.jpg
+|
+|-- unknown/
+    |-- stranger1.jpg
+    |-- stranger2.jpg
+```
+
+Important requirements:
+
+- Folder names under `known/` must match registered identity names in SQLite.
+- Images under `unknown/` must belong to identities not registered in SQLite.
+- Evaluation images must not duplicate enrollment images.
+- Each evaluation image should contain exactly one detectable face.
+- Use images collected with appropriate consent.
+
+### Run Benchmark
+
+Default threshold:
+
+```powershell
+python -m src.benchmark --threshold 0.50
+```
+
+Compare different thresholds:
+
+```powershell
+python -m src.benchmark --threshold 0.40
+python -m src.benchmark --threshold 0.50
+python -m src.benchmark --threshold 0.60
+```
+
+Reports are generated in the `reports/` directory.
+
+Output formats:
+
+- Detailed prediction results: CSV
+- Benchmark summary: CSV
+- Benchmark summary: JSON
+
+## Experimental Results
+
+The following results were obtained from a small local evaluation performed on November 11, 2026.
+
+### Offline Recognition Benchmark
+
+| Metric                  | Result     |
+| ----------------------- | ---------- |
+| Recognition Threshold   | 0.50       |
+| Registered Identities   | 4          |
+| Gallery Embeddings      | 4          |
+| Total Evaluation Images | 5          |
+| Valid Images            | 5          |
+| Known Identity Images   | 4          |
+| Unknown Identity Images | 1          |
+| Correct Predictions     | 5/5        |
+| Accuracy                | 100%       |
+| False Acceptance Rate   | 0%         |
+| False Rejection Rate    | 0%         |
+| Wrong Identity Rate     | 0%         |
+| Mean Processing Latency | 657.314 ms |
+| P95 Processing Latency  | 879.851 ms |
+
+**Important:** These results are from a preliminary five-image evaluation, not a large-scale recognition benchmark. The 100% accuracy applies only to this small test set and does not represent the expected accuracy across unseen identities, lighting conditions, camera devices, or environments.
+
+The latency measurement includes image loading, face detection, face encoding, and embedding matching. It is not a model-only inference benchmark.
+
+### Unit Test Results
+
+```text
+Platform: Windows
+Python: 3.11.9
+pytest: 9.2.0
+
+13 tests collected
+13 tests passed
+```
+
+Run the tests:
+
+```powershell
+python -m pytest tests/ -v
+```
+
+Database unit tests use temporary SQLite files and do not modify the actual face database.
+
+## Known Limitations
+
+- Recognition quality is affected by lighting, pose, occlusion, and image quality.
+- Face matching thresholds require evaluation on a larger independent dataset.
+- The current evaluation dataset is too small for reliable accuracy estimates.
+- CPU-based processing can introduce noticeable recognition latency.
+- The application uses pretrained models rather than training its own neural network.
+- The current SQLite structure stores individual face records, not a fully normalized person-to-multiple-samples relationship.
+- The application is an educational project and is not designed for security-critical biometric authentication.
+
+## Privacy and Security
+
+Facial images and embeddings are sensitive biometric information.
+
+- Local facial databases and raw images are excluded from Git tracking.
+- Do not commit personal photographs or biometric databases.
+- Obtain consent before collecting or processing facial images.
+- Delete registered data when it is no longer required.
+- Avoid using this prototype as the sole basis for access control or identity verification.
+
+## Future Improvements
+
+- Expand the independent benchmark dataset.
+- Improve handling of different lighting conditions and face angles.
+- Add multi-sample enrollment for each registered identity.
+- Improve recognition performance on CPU.
+- Add clearer performance visualizations and benchmark comparison tools.
+- Improve application packaging and Windows installation instructions.
+
+## Author
+
+**Minh Canh**
+
+GitHub: [Minh-Canh33](https://github.com/Minh-Canh33)
+
+Project Repository: [Face Recognition Python](https://github.com/Minh-Canh33/face-recognition-python)
+
+---
+
+If you find this project useful, consider giving it a star on GitHub.
