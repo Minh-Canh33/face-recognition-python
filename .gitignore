@@ -1,13 +1,54 @@
-env-face/
-__pycache__/
-*.pyc
-bin/
-share/
-man/
-doc/
-*.pkl
-*.dat
-dataset/
 
-*.db
+# Python virtual environments
+env-face/
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Local database and biometric data
 data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+
+# Benchmark reports
+reports/
+
+# Logs
+*.log
+logs/
+
+# Build outputs
+build/
+dist/
+*.spec
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local installation artifacts
+/bin/
+/doc/
+/man/
+/share/
