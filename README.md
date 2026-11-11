@@ -80,6 +80,10 @@ The project includes 13 unit tests covering:
 
 ## System Architecture
 
+
+```
+
+```mermaid
 flowchart TD
     A["Webcam"] --> B["OpenCV Video Capture"]
     B --> C["Face Detection"]
@@ -113,6 +117,11 @@ flowchart TD
     class E storage
     class G decision
     class H,I result
+```
+
+```
+```
+
 
 ## How It Works
 
